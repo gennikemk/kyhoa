@@ -9,15 +9,15 @@ require_once('include/class.license.php');
 echo '';
 if ($_POST["do"] == "buyitem") :
 if (!$isAuth) {
-exit(json_encode(array("result"=>false,"msg"=>"กรุณาเข้าสู่ระบบสมาชิก")));
+exit(json_encode(array("result"=>false,"msg"=>"Xin vui lòng đăng nhập hoặc đăng ký.")));
 }
 $ItemArr = ItemArr($_POST["itemid"]);
 if (!$ItemArr) {
-exit(json_encode(array("result"=>false,"msg"=>"ไม่พบสินค้านี้ในระบบฐานข้อมูล")));
+exit(json_encode(array("result"=>false,"msg"=>"Sản phẩm này không còn trong cơ sở dữ liệu")));
 }
 $UserPoint = $UserInfo['point'] -$ItemArr['price'];
 if ($UserPoint <0) {
-exit(json_encode(array("result"=>false,"msg"=>"ยอดเงินคงเหลือของคุณไม่เพียงพอต่อสินค้านี้")));
+exit(json_encode(array("result"=>false,"msg"=>"Số dư của bạn không đủ cho sản phẩm này")));
 }
 if ($Config["feature"]["bungeecord"] == "yes") {
 $SelectServer = $Config["feature"]["bungeecord_server"][$ItemArr["server_id"]];
@@ -31,13 +31,13 @@ $ServerQuery = ServerQuery();
 }
 if ($Config["site"]["function"]["online_check"] == "yes") {
 if (!$ServerQuery['status']) {
-exit(json_encode(array("result"=>false,"msg"=>"ไม่สามารถเชื่อมต่อกับเซิฟเวอร์เกมได้ (Server Query) <br>".$ServerTEXT)));
+exit(json_encode(array("result"=>false,"msg"=>"Không thể kết nối với máy chủ trò chơi (Server Query) <br>".$ServerTEXT)));
 }
 $CheckPlayerOnline = CheckPlayerOnline($ServerQuery);
 if ($CheckPlayerOnline['status'] == "offline") {
-exit(json_encode(array("result"=>false,"msg"=>"ตัวละครของคุณไม่อยู่ภายในเกม <br>".$ServerTEXT)));
+exit(json_encode(array("result"=>false,"msg"=>"Nhân vật của bạn không phải là bên trong trò chơi <br>".$ServerTEXT)));
 }elseif ($CheckPlayerOnline['status'] == "failed") {
-exit(json_encode(array("result"=>false,"msg"=>"ไม่สามารถเชื่อมต่อกับเซิฟเวอร์เกมได้ (Server Query)<br>".$ServerTEXT)));
+exit(json_encode(array("result"=>false,"msg"=>"Không thể kết nối với máy chủ trò chơi (Server Query)<br>".$ServerTEXT)));
 }
 }
 $Command = array();
@@ -54,24 +54,24 @@ if ($Config["feature"]["bungeecord"] == "yes") {
 $ServerRCON = ServerRCON($Command,$RCONSetting);
 if ($ServerRCON["status"]) {
 mysqli_query($conn,"UPDATE `shop_item` SET `buycount`=(`buycount`+1) WHERE `id`='".$ItemArr['id'] ."' LIMIT 1; ");
-$ShopLog = "ซื้อสินค้า <strong>".$ItemArr['name'] ." x".$ItemArr['count'] ."</strong> ด้วย <strong>".number_format($ItemArr['price'],2,'.',',') ." Point </strong> <br> ไปยังเซิฟเวอร์  ".$ServerTEXT;
+$ShopLog = "Mua hàng <strong>".$ItemArr['name'] ." x".$ItemArr['count'] ."</strong> ด้วย <strong>".number_format($ItemArr['price'],2,'.',',') ." Point </strong> <br> ไปยังเซิฟเวอร์  ".$ServerTEXT;
 ShopHistory("buyitem",$ShopLog);
 UserPoint($ItemArr['price']);
 exit(json_encode(array("result"=>true,"msg"=>$ShopLog,"newpoint"=>number_format($UserPoint,2,'.',','))));
 }else {
-exit(json_encode(array("result"=>false,"msg"=>"ไม่สามารถเชื่อมต่อกับเซิฟเวอร์เกมได้ (RCON)<br>".$ServerTEXT)));
+exit(json_encode(array("result"=>false,"msg"=>"Không thể kết nối với máy chủ trò chơi (RCON)<br>".$ServerTEXT)));
 }
 }
 if ($Config['minecraft']['command'] == "rcon") {
 $ServerRCON = ServerRCON($Command);
 if ($ServerRCON["status"]) {
 mysqli_query($conn,"UPDATE `shop_item` SET `buycount`=(`buycount`+1) WHERE `id`='".$ItemArr['id'] ."' LIMIT 1; ");
-$ShopLog = "ซื้อสินค้า <strong>".$ItemArr['name'] ." x".$ItemArr['count'] ."</strong> ด้วย <strong>".number_format($ItemArr['price'],2,'.',',') ." Point </strong>";
+$ShopLog = "Mua hàng <strong>".$ItemArr['name'] ." x".$ItemArr['count'] ."</strong> Với <strong>".number_format($ItemArr['price'],2,'.',',') ." Point </strong>";
 ShopHistory("buyitem",$ShopLog);
 UserPoint($ItemArr['price']);
 exit(json_encode(array("result"=>true,"msg"=>$ShopLog,"newpoint"=>number_format($UserPoint,2,'.',','))));
 }else {
-exit(json_encode(array("result"=>false,"msg"=>"ไม่สามารถเชื่อมต่อกับเซิฟเวอร์เกมได้ (RCON)")));
+exit(json_encode(array("result"=>false,"msg"=>"Không thể kết nối với máy chủ trò chơi (RCON)")));
 }
 }else {
 $ws = new Websend($Config['minecraft']['websend']['ip'],$Config['minecraft']['websend']['port'],$Config['minecraft']['websend']['password']);
@@ -85,12 +85,12 @@ $ws->doCommandAsConsole($Command);
 }
 $ws->disconnect();
 mysqli_query($conn,"UPDATE `shop_item` SET `buycount`=(`buycount`+1) WHERE `id`='".$ItemArr['id'] ."' LIMIT 1; ");
-$ShopLog = "ซื้อสินค้า <strong>".$ItemArr['name'] ." x".$ItemArr['count'] ."</strong> ด้วย <strong>".number_format($ItemArr['price'],2,'.',',') ." Point </strong>";
+$ShopLog = "Mua hàng <strong>".$ItemArr['name'] ." x".$ItemArr['count'] ."</strong> Với <strong>".number_format($ItemArr['price'],2,'.',',') ." Point </strong>";
 ShopHistory("buyitem",$ShopLog);
 UserPoint($ItemArr['price']);
 exit(json_encode(array("result"=>true,"msg"=>$ShopLog,"newpoint"=>number_format($UserPoint,2,'.',','))));
 }else {
-exit(json_encode(array("result"=>false,"msg"=>"ไม่สามารถเชื่อมต่อกับเซิฟเวอร์เกมได้ (WebSend)")));
+exit(json_encode(array("result"=>false,"msg"=>"Không thể kết nối với máy chủ trò chơi (WebSend)")));
 }
 }
 exit(json_encode(array("result"=>false,"msg"=>"End of process (Buyitem)")));
@@ -98,18 +98,18 @@ exit();
 endif;
 if ($_POST["do"] == "getitem") :
 if ($_POST["itemid"] == "") {
-exit(json_encode(array("result"=>false,"msg"=>"กรุณาเลือกสินค้าที่ต้องการ")));
+exit(json_encode(array("result"=>false,"msg"=>"Vui lòng chọn sản phẩm bạn muốn")));
 }
 $ItemArr = ItemArr($_POST["itemid"]);
 if (!$ItemArr) {
-exit(json_encode(array("result"=>false,"msg"=>"ไม่พบสินค้านี้ในระบบฐานข้อมูล")));
+exit(json_encode(array("result"=>false,"msg"=>"Sản phẩm này không còn trong cơ sở dữ liệu")));
 }
 if ($ItemArr["count"] == 0) {
 $ItemArr["count"] = 1;
 }
 unset($ItemArr['order'],$ItemArr['cat_id'],$ItemArr['value'],$ItemArr['type']);
 $ArrayOutput = array("result"=>true);
-$ItemArr["desc"] = $ItemArr["desc"] ."<div class=\"buycount-panel\">ถูกซื้อไปแล้ว <b>".$ItemArr["buycount"] ."</b> ครั้ง";
+$ItemArr["desc"] = $ItemArr["desc"] ."<div class=\"buycount-panel\">Đã được mua <b>".$ItemArr["buycount"] ."</b> Thời gian";
 $ArrayOutput = array_merge($ArrayOutput,$ItemArr);
 exit(json_encode($ArrayOutput));
 exit(json_encode(array("result"=>false,"msg"=>"End last process (1)")));
@@ -136,7 +136,7 @@ header("Location: shop.php");
 exit();
 }
 if ($Config["site"]["function"]["site"] == "yes") {
-DisplayMSG("danger","Website is not available right now.<br>เว็บไซต์ไม่พร้อมให้บริการในขณะนี้");
+DisplayMSG("danger","Website is not available right now.<br>Trang web hiện không có sẵn");
 }
 ;
 echo '<!doctype html>
@@ -225,16 +225,16 @@ include("pages/template.right.php");
 ;
 echo '    </div>
     <div class="col-md-9 col-md-pull-3">
-	<div class="panel-imc-title">Itemshop <small class="hidden-sm">ไอเท็มชอป</small>
+	<div class="panel-imc-title">Itemshop <small class="hidden-sm">Các mục</small>
 		<div class="pull-right col-lg-5 text-right" style="margin-right:-15px;">
 			<form id="search-form" method="get" action="';
 echo $_SERVER["PHP_SELF"];
 echo '">
-				<input type="text" class="form-control" name="search" id="search" placeholder="Search ค้นหาสินค้า" ';
+				<input type="text" class="form-control" name="search" id="search" placeholder="Search Tìm kiếm sản phẩm" ';
 echo(($_GET["search"] == "") ?"": " value=\"".$_GET["search"] ."\"");
 ;
 echo ' >
-				<button type="submit" class="btn btn-sm btn-info"><i class="fa fa-search"></i> ค้นหา</button>
+				<button type="submit" class="btn btn-sm btn-info"><i class="fa fa-search"></i> Tìm kiếm</button>
 			</form>
 		</div>
 	</div>        
@@ -243,11 +243,11 @@ echo ' >
 if (isset($_GET["search"])) {
 ;
 echo '			<div class="category-tab"> <a style="cursor:default;">
-				<i class="fa fa-search" style="font-size:14px;"></i> <small>คุณกำลังค้นหา</small> ';
+				<i class="fa fa-search" style="font-size:14px;"></i> <small>Bạn đang tìm kiếm</small> ';
 echo $_GET["search"];
 echo '				<a href="';
 echo $_SERVER["PHP_SELF"];
-echo '" style="color:red;"><i class="fa fa-times" title="ยกเลิกการค้นหา"></i> ยกเลิกการค้นหา</a>
+echo '" style="color:red;"><i class="fa fa-times" title="Huỷ tìm kiếm"></i> Huỷ tìm kiếm</a>
 			</a>
 			</div>
 				
@@ -263,11 +263,11 @@ echo '				</ul>
 			</div>
 			
 			<div class="category-tab"> <a style="cursor:default;">
-				<i class="fa fa-search" style="font-size:14px;"></i> <small>คุณกำลังค้นหา</small> ';
+				<i class="fa fa-search" style="font-size:14px;"></i> <small>Bạn đang tìm kiếm</small> ';
 echo $_GET["search"];
 echo '				<a href="';
 echo $_SERVER["PHP_SELF"];
-echo '" style="color:red;"><i class="fa fa-times" title="ยกเลิกการค้นหา"></i> ยกเลิกการค้นหา</a>
+echo '" style="color:red;"><i class="fa fa-times" title="Huỷ tìm kiếm"></i> Huỷ tìm kiếm</a>
 			</a>
 			</div>
 
@@ -278,7 +278,7 @@ echo '            <div class="category-tab">
                 ';
 if ($Config["feature"]["bungeecord"] == "no") {
 ;
-echo '<a class="tab-a active" rel="all">All Item <small>สินค้าทั้งหมด</small> </a>';
+echo '<a class="tab-a active" rel="all">All Item <small>Tất cả sản phẩm</small> </a>';
 };
 echo '';
 foreach ($CategoryArr as $ID =>$Cat) {
